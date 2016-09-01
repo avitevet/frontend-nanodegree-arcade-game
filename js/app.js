@@ -6,26 +6,16 @@ const SPRITE_DIM = {
 };
 const BOARD_DIM = {
 	"width" : SPRITE_DIM.x * 5,
-	"height" : 535  // some of the blocks overlap vertically
+	"height" : 535  // some of the blocks overlap vertically so it's not just SPRITE_DIM.y * 5
 };
-const INITIAL_X = -SPRITE_DIM.x;
+const ENEMY_INITIAL_X = -SPRITE_DIM.x;
 const Y_LANES = [400, 315, 230, 145, 60];
 const MIN_SPEED = 100;
 const MAX_SPEED = 500;
 const NUM_ENEMIES = 5;
 const COLLISION_FUDGE_FACTOR = 30;  // the player & enemy must overlap by this much to be considered a collision
 
-var GameObject = function(sprite, x, y) {
-	this.sprite = sprite;
-	this.x = x;
-	this.y = y;
-}
-
-GameObject.prototype.render = function() {
-	ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-}
-
-var randomRange = function(min, max) {
+ function randomRange(min, max) {
 	return Math.floor(Math.random() * (max - min)) + min;
 }
 
@@ -36,20 +26,15 @@ var Enemy = function() {
 
   // The image/sprite for our enemies, this uses
   // a helper we've provided to easily load images
-  var sprite = 'images/enemy-bug.png';
+  this.sprite = 'images/enemy-bug.png';
 
-	// initial position for the enemy
-	var x = INITIAL_X;
-	var y = Y_LANES[randomRange(1, Y_LANES.length)];
-
-	GameObject.call(this, sprite, x, y);
-
-	this.newSpeed();
+	this.reset();
 };
-Enemy.prototype = Object.create(GameObject.prototype);
-Enemy.prototype.constructor = Enemy;
 
-Enemy.prototype.newSpeed = function() {
+Enemy.prototype.reset = function() {
+	this.x = ENEMY_INITIAL_X;
+	this.y = Y_LANES[randomRange(1, Y_LANES.length)];
+
 	// speed at which the enemy moves.  It should be mostly slow-moving
 	// enemies, with a few fast moving enemies.  So, first pick a random number
 	// between min & max, which establishes an upper bound.  Then pick another
@@ -57,6 +42,11 @@ Enemy.prototype.newSpeed = function() {
 	// more likely to be selected than high speeds.
 	this.speed = randomRange(MIN_SPEED, randomRange(MIN_SPEED, MAX_SPEED));
 }
+
+Enemy.prototype.render = function() {
+	ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+}
+
 
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
@@ -67,9 +57,7 @@ Enemy.prototype.update = function(dt) {
 		this.x += this.speed * dt;
 
 		if (this.x > BOARD_DIM.width + SPRITE_DIM.x) {
-			this.x = INITIAL_X;
-			this.y = Y_LANES[randomRange(1, Y_LANES.length)];
-			this.newSpeed();
+			this.reset();
 		}
 };
 
@@ -77,14 +65,9 @@ Enemy.prototype.update = function(dt) {
 // This class requires an update(), render() and
 // a handleInput() method.
 var Player = function() {
-	var sprite = 'images/char-boy.png';
-	var x = 2 * SPRITE_DIM.x,
-		y = Y_LANES[0];
-	GameObject.call(this, sprite, x, y);
+	this.sprite = 'images/char-boy.png';
+	this.reset();
 };
-Player.prototype = Object.create(GameObject.prototype);
-Player.prototype.constructor = Player;
-
 
 Player.prototype.update = function() {
 	// perform collision detection
@@ -97,6 +80,10 @@ Player.prototype.update = function() {
 		}
 	});
 };
+
+Player.prototype.render = function() {
+	ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+}
 
 Player.prototype.reset = function() {
 	this.x = 2 * SPRITE_DIM.x;
