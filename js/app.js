@@ -12,6 +12,8 @@ const INITIAL_X = -SPRITE_DIM.x;
 const Y_LANES = [400, 315, 230, 145, 60];
 const MIN_SPEED = 100;
 const MAX_SPEED = 500;
+const NUM_ENEMIES = 5;
+const COLLISION_FUDGE_FACTOR = 30;  // the player & enemy must overlap by this much to be considered a collision
 
 var GameObject = function(sprite, x, y) {
 	this.sprite = sprite;
@@ -89,8 +91,8 @@ Player.prototype.update = function() {
 	var self = this;
 	allEnemies.forEach(function(enemy) {
 		if ((enemy.y === self.y)
-			&& (enemy.x + SPRITE_DIM.x > self.x)
-			&& (enemy.x < self.x + SPRITE_DIM.x)) {
+			&& (enemy.x + SPRITE_DIM.x - COLLISION_FUDGE_FACTOR > self.x)
+			&& (enemy.x < self.x + SPRITE_DIM.x - COLLISION_FUDGE_FACTOR)) {
 			lose();
 		}
 	});
@@ -139,7 +141,10 @@ function lose() {
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
 var player = new Player();
-var allEnemies = [new Enemy()];
+var allEnemies = [];
+for (var i = 0; i < NUM_ENEMIES; ++i) {
+	allEnemies.push(new Enemy());
+}
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
