@@ -86,11 +86,17 @@ Player.prototype.constructor = Player;
 
 Player.prototype.update = function() {
 	// perform collision detection
+	var self = this;
+	allEnemies.forEach(function(enemy) {
+		if ((enemy.y === self.y)
+			&& (enemy.x + SPRITE_DIM.x > self.x)
+			&& (enemy.x < self.x + SPRITE_DIM.x)) {
+			lose();
+		}
+	});
 };
 
-
-Player.prototype.win = function() {
-	// reset x & y
+Player.prototype.reset = function() {
 	this.x = 2 * SPRITE_DIM.x;
 	this.y = Y_LANES[0];
 }
@@ -111,10 +117,23 @@ Player.prototype.handleInput = function(dir) {
 			this.y -= SPRITE_DIM.tile_y;
 		}
 		else {
-			this.win();
+			win();
 		}
 	}
 };
+
+function win() {
+	player.reset();
+}
+
+function lose() {
+	// right now this is the same as win, but eventually win will increment the
+	// win counter, display a message, or something like that, while
+	// lose will increment the loss counter, display a loss message, or something
+	// like that.
+	player.reset();
+}
+
 
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
