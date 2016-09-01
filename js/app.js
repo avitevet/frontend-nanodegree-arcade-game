@@ -1,4 +1,39 @@
 /* global Resources, ctx */
+
+window.EASY = {
+	"num_enemies" : 3,
+	"min_speed" : 100,
+	"max_speed" : 300,
+	"get_speed" : function() { return randomRange(this.min_speed, this.max_speed); }
+};
+window.MEDIUM = {
+	"num_enemies" : 5,
+	"min_speed" : 100,
+	"max_speed" : 500,
+	"get_speed" : function() {
+		// speed at which the enemy moves.  It should be mostly slow-moving
+		// enemies, with a few fast moving enemies.  So, first pick a random number
+		// between min & max, which establishes an upper bound.  Then pick another
+		// number between min & upper, which becomes the speed.  This makes low speeds
+		// more likely to be selected than high speeds.
+		return randomRange(this.min_speed, randomRange(this.min_speed, this.max_speed));
+	}
+};
+window.HARD = {
+	"num_enemies" : 6,
+	"min_speed" : 50,
+	"max_speed" : 700,
+	"get_speed" : function() {
+		// speed at which the enemy moves.  It should be mostly fast-moving
+		// enemies, with a few slow moving enemies.  So, first pick a random number
+		// between min & max, which establishes a lower bound.  Then pick another
+		// number between lower & max, which becomes the speed.  This makes high speeds
+		// more likely to be selected than low speeds.
+		return randomRange(randomRange(this.min_speed, this.max_speed), this.max_speed);
+	}
+};
+
+
 const SPRITE_DIM = {
 	"x" : 101,
 	"y" : 171,
@@ -6,9 +41,7 @@ const SPRITE_DIM = {
 };
 const NUM_ROWS = 5;
 const NUM_COLS = 5;
-const MIN_SPEED = 100;
-const MAX_SPEED = 500;
-const NUM_ENEMIES = 5;
+
 const COLLISION_FUDGE_FACTOR = 30;  // the player & enemy must overlap by this much to be considered a collision
 const BOARD_WIDTH = SPRITE_DIM.x * NUM_COLS;
 
@@ -37,7 +70,7 @@ var Enemy = function() {
 };
 
 Enemy.prototype.reset = function() {
-	console.log("resetting from x = " + this.x + " and y = " + this.y);
+	//console.log("resetting from x = " + this.x + " and y = " + this.y);
 
 	this.x = col2board(-1);
 	this.y = row2board(randomRange(1, NUM_ROWS));
@@ -48,7 +81,7 @@ Enemy.prototype.reset = function() {
 	// between min & max, which establishes an upper bound.  Then pick another
 	// number between min & upper, which becomes the speed.  This makes low speeds
 	// more likely to be selected than high speeds.
-	this.speed = randomRange(MIN_SPEED, randomRange(MIN_SPEED, MAX_SPEED));
+	this.speed = Difficulty.level.get_speed();
 }
 
 Enemy.prototype.render = function() {
@@ -146,6 +179,34 @@ Scoreboard.prototype.lose = function() {
 	this.lossesEl.innerHTML = this.losses;
 }
 
+Scoreboard.prototype.reset = function() {
+	this.wins = 0;
+	this.losses = 0;
+	this.winsEl.innerHTML = this.wins;
+	this.lossesEl.innerHTML = this.losses;
+}
+
+
+var Difficulty = function(difficultyContainer) {
+	var radioChangeHandler = function() {
+		player.reset();
+		scoreboard.reset();
+		Difficulty.level = window[this.value];
+
+		allEnemies = [];
+		for (var i = 0; i < Difficulty.level.num_enemies; ++i) {
+			allEnemies.push(new Enemy());
+		}
+	}
+
+	var radios = difficultyContainer.getElementsByTagName("input");
+	for (var radio in radios) {
+		radios[radio].onclick = radioChangeHandler;
+	}
+}
+
+Difficulty.level = EASY;
+
 
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
@@ -153,7 +214,8 @@ Scoreboard.prototype.lose = function() {
 var player = new Player();
 var allEnemies = [];
 var scoreboard = new Scoreboard(document.getElementById("statsTable"));
-for (var i = 0; i < NUM_ENEMIES; ++i) {
+var difficulty = new Difficulty(document.getElementById("difficultyList"));
+for (var i = 0; i < Difficulty.level.num_enemies; ++i) {
 	allEnemies.push(new Enemy());
 }
 
