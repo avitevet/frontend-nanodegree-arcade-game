@@ -197,6 +197,9 @@ var Difficulty = function(difficultyContainer) {
 		for (var i = 0; i < Difficulty.level.num_enemies; ++i) {
 			allEnemies.push(new Enemy());
 		}
+
+		// give focus back to the canvas by taking it from the radio buttons
+		this.blur();
 	}
 
 	var radios = difficultyContainer.getElementsByTagName("input");
