@@ -84,8 +84,8 @@ Player.prototype = Object.create(GameObject.prototype);
 Player.prototype.constructor = Player;
 
 
-Player.prototype.update = function(dt) {
-
+Player.prototype.update = function() {
+	// perform collision detection
 };
 
 
