@@ -87,7 +87,7 @@ Player.prototype.update = function() {
 		if ((enemy.y === self.y)
 			&& (enemy.x + SPRITE_DIM.x - COLLISION_FUDGE_FACTOR > self.x)
 			&& (enemy.x < self.x + SPRITE_DIM.x - COLLISION_FUDGE_FACTOR)) {
-			lose();
+			scoreboard.lose();
 		}
 	});
 };
@@ -117,21 +117,33 @@ Player.prototype.handleInput = function(dir) {
 			this.row++;
 		}
 		else {
-			win();
+			scoreboard.win();
 		}
 	}
 };
 
-function win() {
-	player.reset();
+var Scoreboard = function(statsTable) {
+	var tds = statsTable.getElementsByTagName("td");
+	this.winsEl = tds[0];
+	this.lossesEl = tds[1];
+
+	this.wins = 0;
+	this.losses = 0;
+
+	this.winsEl.innerHTML = this.wins;
+	this.lossesEl.innerHTML = this.losses;
 }
 
-function lose() {
-	// right now this is the same as win, but eventually win will increment the
-	// win counter, display a message, or something like that, while
-	// lose will increment the loss counter, display a loss message, or something
-	// like that.
+Scoreboard.prototype.win = function() {
 	player.reset();
+	this.wins++;
+	this.winsEl.innerHTML = this.wins;
+}
+
+Scoreboard.prototype.lose = function() {
+	player.reset();
+	this.losses++;
+	this.lossesEl.innerHTML = this.losses;
 }
 
 
@@ -140,6 +152,7 @@ function lose() {
 // Place the player object in a variable called player
 var player = new Player();
 var allEnemies = [];
+var scoreboard = new Scoreboard(document.getElementById("statsTable"));
 for (var i = 0; i < NUM_ENEMIES; ++i) {
 	allEnemies.push(new Enemy());
 }

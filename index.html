@@ -4,8 +4,27 @@
     <meta charset="UTF-8">
     <title>Effective JavaScript: Frogger</title>
     <link rel="stylesheet" href="css/style.css">
+		<link rel="stylesheet" href="css/user.css">
 </head>
 <body>
+		<div id="stats">
+			<ul id="difficultyList">
+				<li><input type="radio" name="difficulty" value="easy" checked> Easy</li>
+				<li><input type="radio" name="difficulty" value="medium" > Medium</li>
+				<li><input type="radio" name="difficulty" value="hard" > Hard</li>
+			</ul>
+
+			<table id="statsTable">
+				<tr>
+					<th>Wins</th>
+					<th>Losses</th>
+				</tr>
+				<tr>
+					<td></td>
+					<td></td>
+				</tr>
+			</table>
+		</div>
     <script src="js/resources.js"></script>
     <script src="js/app.js"></script>
     <script src="js/engine.js"></script>
