@@ -2,21 +2,26 @@
 const SPRITE_DIM = {
 	"x" : 101,
 	"y" : 171,
-	"tile_y" : 85
+	"visible" : 85  // heigt of the non-overlapping part of the tile
 };
-const BOARD_DIM = {
-	"width" : SPRITE_DIM.x * 5,
-	"height" : 535  // some of the blocks overlap vertically so it's not just SPRITE_DIM.y * 5
-};
-const ENEMY_INITIAL_X = -SPRITE_DIM.x;
-const Y_LANES = [400, 315, 230, 145, 60];
+const NUM_ROWS = 5;
+const NUM_COLS = 5;
 const MIN_SPEED = 100;
 const MAX_SPEED = 500;
 const NUM_ENEMIES = 5;
 const COLLISION_FUDGE_FACTOR = 30;  // the player & enemy must overlap by this much to be considered a collision
+const BOARD_WIDTH = SPRITE_DIM.x * NUM_COLS;
 
- function randomRange(min, max) {
+function randomRange(min, max) {
 	return Math.floor(Math.random() * (max - min)) + min;
+}
+
+function col2board(col) {
+	return col * SPRITE_DIM.x;
+}
+
+function row2board(row) {
+	return 400 - row * SPRITE_DIM.visible;
 }
 
 // Enemies our player must avoid
@@ -32,8 +37,11 @@ var Enemy = function() {
 };
 
 Enemy.prototype.reset = function() {
-	this.x = ENEMY_INITIAL_X;
-	this.y = Y_LANES[randomRange(1, Y_LANES.length)];
+	console.log("resetting from x = " + this.x + " and y = " + this.y);
+
+	this.x = col2board(-1);
+	this.y = row2board(randomRange(1, NUM_ROWS));
+
 
 	// speed at which the enemy moves.  It should be mostly slow-moving
 	// enemies, with a few fast moving enemies.  So, first pick a random number
@@ -56,7 +64,7 @@ Enemy.prototype.update = function(dt) {
     // all computers.
 		this.x += this.speed * dt;
 
-		if (this.x > BOARD_DIM.width + SPRITE_DIM.x) {
+		if (this.x > BOARD_WIDTH + SPRITE_DIM.x) {
 			this.reset();
 		}
 };
@@ -70,6 +78,9 @@ var Player = function() {
 };
 
 Player.prototype.update = function() {
+	this.x = col2board(this.col);
+	this.y = row2board(this.row);
+
 	// perform collision detection
 	var self = this;
 	allEnemies.forEach(function(enemy) {
@@ -86,24 +97,24 @@ Player.prototype.render = function() {
 }
 
 Player.prototype.reset = function() {
-	this.x = 2 * SPRITE_DIM.x;
-	this.y = Y_LANES[0];
+	this.row = 0;
+	this.col = 2;
 }
 
 Player.prototype.handleInput = function(dir) {
 	// check for valid move, then update x & y as necessary
-	if ((dir === "left") && (this.x !== 0)) {
-		this.x -= SPRITE_DIM.x;
+	if ((dir === "left") && (this.col !== 0)) {
+		this.col--;
 	}
-	else if ((dir === "right") && (this.x !== 4 * SPRITE_DIM.x)) {
-		this.x += SPRITE_DIM.x;
+	else if ((dir === "right") && (this.col !== NUM_COLS - 1)) {
+		this.col++;
 	}
-	else if ((dir === "down") && (this.y !== Y_LANES[0])) {
-		this.y += SPRITE_DIM.tile_y;
+	else if ((dir === "down") && (this.row !== 0)) {
+		this.row--;
 	}
 	else if (dir === "up") {
-		if (this.y !== Y_LANES[Y_LANES.length - 1]) {
-			this.y -= SPRITE_DIM.tile_y;
+		if (this.row !== NUM_ROWS - 1) {
+			this.row++;
 		}
 		else {
 			win();
